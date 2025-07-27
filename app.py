@@ -99,7 +99,7 @@ if md_files:
         with col1:
             font_family = st.selectbox(
                 "Font Family", 
-                ["Auto-detect", "Open Sans", "Liberation Serif", "DejaVu Serif", "Times", "Default"],
+                ["Auto-detect", "Liberation Serif", "DejaVu Serif", "Times", "Default"],
                 index=0
             )
             font_size = st.selectbox("Font Size", ["10pt", "11pt", "12pt", "14pt"], index=2)
@@ -179,40 +179,29 @@ if md_files:
                         
                         # Handle font selection
                         if font_family == "Auto-detect":
-                            # Try to detect and use available fonts
-                            fonts_to_try = [
-                                ("Liberation Serif", "Liberation Mono"),
-                                ("DejaVu Serif", "DejaVu Sans Mono"),
-                                ("Times", "Courier"),
-                                ("serif", "monospace")  # Generic fallbacks
-                            ]
-                            
-                            font_found = False
-                            for main_font, mono_font in fonts_to_try:
-                                try:
-                                    # Test if font is available by checking fc-list output
-                                    result = subprocess.run(
-                                        ["fc-list", f":family={main_font}"], 
-                                        capture_output=True, text=True
-                                    )
-                                    if result.returncode == 0 and result.stdout.strip():
-                                        pandoc_cmd.extend(["-V", f"mainfont={main_font}"])
-                                        pandoc_cmd.extend(["-V", f"monofont={mono_font}"])
-                                        font_found = True
-                                        break
-                                except FileNotFoundError:
-                                    # fc-list not available, skip font detection
-                                    break
-                            
-                            # If no fonts found or fc-list not available, use generic fallbacks
-                            if not font_found:
+                            # Use safe fallback fonts for cloud environments
+                            # Liberation fonts are installed via packages.txt
+                            try:
+                                # Check if Liberation fonts are available
+                                result = subprocess.run(
+                                    ["fc-list", ":family=Liberation Serif"], 
+                                    capture_output=True, text=True
+                                )
+                                if result.returncode == 0 and result.stdout.strip():
+                                    pandoc_cmd.extend(["-V", "mainfont=Liberation Serif"])
+                                    pandoc_cmd.extend(["-V", "monofont=Liberation Mono"])
+                                else:
+                                    # Fallback to generic serif/monospace
+                                    pandoc_cmd.extend(["-V", "mainfont=serif"])
+                                    pandoc_cmd.extend(["-V", "monofont=monospace"])
+                            except FileNotFoundError:
+                                # fc-list not available, use generic fonts
                                 pandoc_cmd.extend(["-V", "mainfont=serif"])
                                 pandoc_cmd.extend(["-V", "monofont=monospace"])
                         
                         elif font_family != "Default":
                             # Use selected font
                             font_mapping = {
-                                "Open Sans": ("Open Sans", "DejaVu Sans Mono"),
                                 "Liberation Serif": ("Liberation Serif", "Liberation Mono"),
                                 "DejaVu Serif": ("DejaVu Serif", "DejaVu Sans Mono"),
                                 "Times": ("Times", "Courier")
