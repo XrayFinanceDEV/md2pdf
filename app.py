@@ -285,7 +285,7 @@ if uploaded_files:
                     # Replace background path placeholder with actual path (only if title page is enabled)
                     if include_title_page:
                         # Use background PNG directly
-                        background_src = Path("docs/background5.png")
+                        background_src = Path("background5.png")
                         background_dest = Path(temp_dir) / "background.png"
                         
                         if background_src.exists():
