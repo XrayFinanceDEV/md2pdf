@@ -6,3 +6,5 @@ texlive-latex-extra
 fonts-liberation
 fonts-dejavu-core
 fontconfig
+texlive-pictures
+texlive-science
